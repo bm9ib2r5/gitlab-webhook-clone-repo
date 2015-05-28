@@ -126,6 +126,10 @@ class Handler(BaseHTTPRequestHandler):
 				logging.error("Git clean failed!")
 				print("Git clean failed!")
 			#print retvalue
+	else:
+		print "Action not supported"
+		logging.info("Action not supported")
+
 	logging.info(" ")
 	print(" ")
 		
