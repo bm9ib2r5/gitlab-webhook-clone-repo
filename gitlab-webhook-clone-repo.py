@@ -13,8 +13,8 @@ import sys
 import threading
 
 ############# CONFIG
-sourcedir="/export/www"
-gitserver="git@10.11.11.84:root/"
+sourcedir="/export/www/x2"
+gitserver="git@10.11.11.84:devs/"
 
 ############# LOGGING
 logging.basicConfig(filename='/tmp/gitlab-webhook-clone-repo.log',level=logging.DEBUG,format='[ %(thread)d ] %(asctime)s %(message)s', datefmt='%m/%d/%Y %H:%M:%S ')
@@ -57,10 +57,15 @@ class Handler(BaseHTTPRequestHandler):
 	print('===' + ' BRANCH: '+branch+' REPOSITORY: '+repository+' ACTION: '+action)
 
 	repodir=sourcedir+'/'+repository
-	if action == "push":	
-		if not os.path.exists(repodir):
-			os.mkdir(repodir)
-			logging.info('Creating: '+repodir)
+	if action == "push":
+		checkdestdir=''.join(['ssh fotka@localhost "[ -d ', repodir, ' ]")'])
+		retvalue=os.system(checkdestdir)
+		if retvalue != '0':
+			print('Creating: '+repodir)
+			createdestdir='ssh fotka@localhost mkdir '+repodir
+			retvalue=os.system(createdestdir)
+			if retvalue != '0':
+				print('Error creating: '+repodir)
 
 		DIR_NAME=repodir+'/'+branch
 		REMOTE_URL=gitserver+repository+'.git'
@@ -79,7 +84,7 @@ class Handler(BaseHTTPRequestHandler):
 			gitcheckout='git --git-dir='+DIR_NAME+'/.git --work-tree='+DIR_NAME+' checkout --quiet --force '+branch
 			githardreset='git --git-dir='+DIR_NAME+'/.git --work-tree='+DIR_NAME+' reset --quiet --hard origin/'+branch
 			gitclean='git --git-dir='+DIR_NAME+'/.git --work-tree='+DIR_NAME+' clean --quiet --force -d -x'
-			#print gitsetremote
+			print gitsetremote
 			#print gitfetch
 			#print gitcheckout
 			#print githardreset

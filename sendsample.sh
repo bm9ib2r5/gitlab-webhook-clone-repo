@@ -1,1 +1,1 @@
-curl -d @repo.json http://localhost:8080
+curl -d @repo.json http://localhost:8888
