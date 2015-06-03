@@ -8,7 +8,7 @@
   "user_email": "john@example.com",
   "project_id": 15,
   "repository": {
-    "name": "poligon.pl",
+    "name": "poligon2.pl",
     "url": "git@example.com:mike/diasporadiaspora.git",
     "description": "",
     "homepage": "http://example.com/mike/diaspora", 
