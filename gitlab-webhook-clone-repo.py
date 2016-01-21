@@ -13,8 +13,8 @@ import sys
 import threading
 
 ############# CONFIG
-sourcedir="/export/www"
-gitserver="git@10.11.11.84:root/"
+sourcedir="/tmp/www"
+### gitserver="git@10.11.11.84:root/"
 
 ############# LOGGING
 logging.basicConfig(filename='/tmp/gitlab-webhook-clone-repo.log',level=logging.DEBUG,format='[ %(thread)d ] %(asctime)s %(message)s', datefmt='%m/%d/%Y %H:%M:%S ')
@@ -50,20 +50,24 @@ class Handler(BaseHTTPRequestHandler):
         outb = out.split('/')
 	branch = outb[2]
 	repository=(text['repository']['name'])
+        REMOTE_URL=(text['repository']['git_ssh_url'])
 	action=(text['object_kind'])
+        commitAfter=(text['after'])
+        if commitAfter == "0000000000000000000000000000000000000000":
+            action='deleteBranch'
 	logging.info(" ")
 	logging.info("====== BRANCH: "+branch+" REPOSITORY: "+repository+" ACTION: "+action+"=====")
 	print(" ")
 	print('===' + ' BRANCH: '+branch+' REPOSITORY: '+repository+' ACTION: '+action)
 
 	repodir=sourcedir+'/'+repository
+	DIR_NAME=repodir+'/'+branch
+
 	if action == "push":	
 		if not os.path.exists(repodir):
 			os.mkdir(repodir)
 			logging.info('Creating: '+repodir)
 
-		DIR_NAME=repodir+'/'+branch
-		REMOTE_URL=gitserver+repository+'.git'
 		if not os.path.exists(DIR_NAME):
 			gitclone='git clone '+REMOTE_URL+' '+DIR_NAME
 			logging.info('Clonning repository: '+REMOTE_URL+' to '+DIR_NAME)
@@ -126,9 +130,20 @@ class Handler(BaseHTTPRequestHandler):
 				logging.error("Git clean failed!")
 				print("Git clean failed!")
 			#print retvalue
+	if action == "deleteBranch":	
+	    if os.path.exists(DIR_NAME):
+                logging.info ('Deleting directory: '+DIR_NAME)
+                print ('Deleting directory: '+DIR_NAME)
+
+                shutil.rmtree(DIR_NAME)
+                # retvalue=shutil.rmtree(DIR_NAME)
+                # if retvalue != 0:
+                #    logging.error("Delete branch failed!")
+                #    print("Delete branch failed!")
+                #    #print retvalue
 	else:
-		print "Action not supported"
-		logging.info("Action not supported")
+            print ('Action: '+action+' not supported')
+            logging.info('Action: '+action+' not supported')
 
 	logging.info(" ")
 	print(" ")
