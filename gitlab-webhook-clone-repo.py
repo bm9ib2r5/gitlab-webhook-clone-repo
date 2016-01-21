@@ -14,7 +14,6 @@ import threading
 
 ############# CONFIG
 sourcedir="/tmp/www"
-### gitserver="git@10.11.11.84:root/"
 
 ############# LOGGING
 logging.basicConfig(filename='/tmp/gitlab-webhook-clone-repo.log',level=logging.DEBUG,format='[ %(thread)d ] %(asctime)s %(message)s', datefmt='%m/%d/%Y %H:%M:%S ')
@@ -96,7 +95,7 @@ class Handler(BaseHTTPRequestHandler):
 			retvalue=os.system(gitsetremote)
 			if retvalue != 0:
 				logging.error("Set remote failed!")
-				print("Set remote failed!")
+                                print("Error: Set remote failed!")
 			#print retvalue
 
 			logging.info('Fetch: git --git-dir='+DIR_NAME+'/.git --work-tree='+DIR_NAME+' fetch --quiet --all --prune')
@@ -104,7 +103,7 @@ class Handler(BaseHTTPRequestHandler):
 			retvalue=os.system(gitfetch)
 			if retvalue != 0:
 				logging.error("Git fetch failed!")
-				print("Git fetch failed!")
+                                print("Error: Git fetch failed!")
 			#print retvalue
 
 			logging.info('Checkout: git --git-dir='+DIR_NAME+'/.git --work-tree='+DIR_NAME+' checkout --quiet --force '+branch)
@@ -112,7 +111,7 @@ class Handler(BaseHTTPRequestHandler):
 			retvalue=os.system(gitcheckout)
 			if retvalue != 0:
 				logging.error("Git checkout failed!")
-				print("Git checkout failed!")
+                                print("Error: Git checkout failed!")
 			#print retvalue
 
 			logging.info('Hard reset: git --git-dir='+DIR_NAME+'/.git --work-tree='+DIR_NAME+' reset --quiet --hard origin/'+branch)
@@ -120,7 +119,7 @@ class Handler(BaseHTTPRequestHandler):
 			retvalue=os.system(githardreset)
 			if retvalue != 0:
 				logging.error("Git hard reset failed!")
-				print("Git hard reset failed!")
+                                print("Error: Git hard reset failed!")
 			#print retvalue
 
 			logging.info('Clean: git --git-dir='+DIR_NAME+'/.git --work-tree='+DIR_NAME+' clean --quiet --force -d -x')
@@ -128,19 +127,19 @@ class Handler(BaseHTTPRequestHandler):
 			retvalue=os.system(gitclean)
 			if retvalue != 0:
 				logging.error("Git clean failed!")
-				print("Git clean failed!")
+                                print("Error: Git clean failed!")
 			#print retvalue
 	if action == "deleteBranch":	
 	    if os.path.exists(DIR_NAME):
                 logging.info ('Deleting directory: '+DIR_NAME)
                 print ('Deleting directory: '+DIR_NAME)
 
-                shutil.rmtree(DIR_NAME)
-                # retvalue=shutil.rmtree(DIR_NAME)
-                # if retvalue != 0:
-                #    logging.error("Delete branch failed!")
-                #    print("Delete branch failed!")
-                #    #print retvalue
+                try:
+                    shutil.rmtree(DIR_NAME)
+                except OSError, e:
+                    print ("Error: %s - %s." % (e.filename,e.strerror))
+                    logging.error("Error: branch failed!")
+
 	else:
             print ('Action: '+action+' not supported')
             logging.info('Action: '+action+' not supported')
